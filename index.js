@@ -133,6 +133,23 @@ async function run() {
         res.send(result);
       }
     );
+    // member update
+    app.patch(
+      "/users/member/:email",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const email = req.params.email;
+        const filter = { email: email };
+        const updatedDoc = {
+          $set: {
+            role: "member",
+          },
+        };
+        const result = await userCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      }
+    );
 
     app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
@@ -182,6 +199,14 @@ async function run() {
     const count = await apartmentCollection.estimatedDocumentCount();
     res.send({ count });
   });
+  // ---------------------------------------
+  // BookedApartment
+  app.post('/bookedApartment', verifyToken, verifyAdmin, async(req,res) =>{
+    const apartment = req.body
+    const result = await bookedApartmentCollection.insertOne(apartment)
+    res.send(result)
+  })
+  // ---------------------------------------
 
   // AgreementREquest
   app.post('/agreementRequests', verifyToken, async(req,res) =>{
@@ -201,8 +226,8 @@ async function run() {
     const updatedAgreement = req.body;
     const updateDoc ={
       $set:{
-        status: updatedAgreement.status,
-        checkingTime: updatedAgreement.checkingTime
+        Status: updatedAgreement.Status,
+        // checkingTime: updatedAgreement.checkingTime
       },
     };
     const result = await agreementRequestCollection.updateOne(filter, updateDoc)
