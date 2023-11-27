@@ -153,9 +153,20 @@ async function run() {
     })
 
     app.get('/apartment', async(req, res)=>{
-      const result = await apartmentCollection.find().toArray()
+      const page = parseInt(req.query.page)
+      const size = parseInt(req.query.size)
+      const result = await apartmentCollection
+      .find()
+      .skip(page*size)
+      .limit(size)
+      .toArray()
       res.send(result)
   })
+
+  app.get("/apartmentsCount", async (req, res) => {
+    const count = await apartmentCollection.estimatedDocumentCount();
+    res.send({ count });
+  });
 
   // AgreementREquest
   app.post('/agreementRequests', verifyToken, async(req,res) =>{
