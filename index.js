@@ -30,6 +30,7 @@ async function run() {
 
     const apartmentCollection = client.db("myBuilding").collection("apartment");
     const couponCollection = client.db("myBuilding").collection("coupon");
+    const agreementRequestCollection = client.db("myBuilding").collection("agreementRequests");
     const userCollection = client.db("myBuilding").collection("users");
 
     // -------------------------------
@@ -154,6 +155,13 @@ async function run() {
     app.get('/apartment', async(req, res)=>{
       const result = await apartmentCollection.find().toArray()
       res.send(result)
+  })
+
+  // AgreementREquest
+  app.post('/agreementRequests', verifyToken, async(req,res) =>{
+    const item = req.body
+    const result = await agreementRequestCollection.insertOne(item)
+    res.send(result)
   })
 
     // ------------------------------
