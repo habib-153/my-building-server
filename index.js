@@ -29,7 +29,9 @@ async function run() {
     // await client.connect();
 
     const apartmentCollection = client.db("myBuilding").collection("apartment");
+    const bookedApartmentCollection = client.db("myBuilding").collection("bookedApartment");
     const couponCollection = client.db("myBuilding").collection("coupon");
+    const announcementCollection = client.db("myBuilding").collection("announcement");
     const agreementRequestCollection = client.db("myBuilding").collection("agreementRequests");
     const userCollection = client.db("myBuilding").collection("users");
 
@@ -100,6 +102,19 @@ async function run() {
         admin = user?.role === "admin";
       }
       res.send({ admin });
+    });
+    app.get("/users/member/:email", verifyToken, async (req, res) => {
+      const email = req.params.email;
+      if (email !== req.decoded.email) {
+        return res.status(403).send({ message: "Unauthorized" });
+      }
+      const query = { email: email };
+      const user = await userCollection.findOne(query);
+      let member = false;
+      if (user) {
+        member = user?.role === "member";
+      }
+      res.send({ member });
     });
 
     app.patch(
@@ -174,6 +189,38 @@ async function run() {
     const result = await agreementRequestCollection.insertOne(item)
     res.send(result)
   })
+
+  app.get("/agreementRequests",verifyToken, verifyAdmin, async (req, res) => {
+    const result = await agreementRequestCollection.find().toArray();
+    res.send(result);
+  });
+
+  app.patch('/agreementRequests/:id', async(req, res) =>{
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id)}
+    const updatedAgreement = req.body;
+    const updateDoc ={
+      $set:{
+        status: updatedAgreement.status,
+        checkingTime: updatedAgreement.checkingTime
+      },
+    };
+    const result = await agreementRequestCollection.updateOne(filter, updateDoc)
+    res.send(result)
+  })
+
+  // Announcements
+  app.post('/announcement', verifyToken, verifyAdmin, async(req,res) =>{
+    const announcement = req.body
+    const result = await announcementCollection.insertOne(announcement)
+    res.send(result)
+  })
+
+  app.get("/announcement", async (req, res) => {
+    const result = await announcementCollection.find().toArray();
+    res.send(result);
+  });
+  // ---------------------------
 
     // ------------------------------
     // Payment Intent
