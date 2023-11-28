@@ -34,6 +34,7 @@ async function run() {
     const announcementCollection = client.db("myBuilding").collection("announcement");
     const agreementRequestCollection = client.db("myBuilding").collection("agreementRequests");
     const userCollection = client.db("myBuilding").collection("users");
+    const paymentCollection = client.db("myBuilding").collection("payments")
 
     // -------------------------------
     // jwt api's
@@ -282,7 +283,27 @@ async function run() {
 
     // ------------------------------
     // Payment Intent
+    app.post('/create-payment-intent', async(req, res)=>{
+      const {price} = req.body
+      const amount = parseInt(price * 100)
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: "usd",
+        payment_method_types: [
+          "card"
+        ],
+      })
+      res.send({
+        clientSecret: paymentIntent.client_secret,
+      });
+    })
 
+    app.post('/payments', async(req, res)=>{
+      const payment = req.body;
+      const paymentResult = await paymentCollection.insertOne(payment)
+      console.log('payment info', payment)
+      res.status(200).send(paymentResult)
+    })
     // -----------------------------
     // Stats and Analytics
 
