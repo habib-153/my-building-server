@@ -90,6 +90,13 @@ async function run() {
       res.send(result);
     });
 
+    app.get('/members', verifyToken, async(req, res)=>{
+      const role = 'member'
+      const query = {role: role}
+      const result = await userCollection.find(query).toArray()
+      res.send(result)
+    })
+
     app.get("/users/admin/:email", verifyToken, async (req, res) => {
       const email = req.params.email;
       if (email !== req.decoded.email) {
@@ -151,6 +158,23 @@ async function run() {
       }
     );
 
+    app.patch(
+      "/users/:id",
+      verifyToken,
+      verifyAdmin,
+      async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const updatedDoc = {
+          $set: {
+            role: "user",
+          },
+        };
+        const result = await userCollection.updateOne(filter, updatedDoc);
+        res.send(result);
+      }
+    );
+
     app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
@@ -204,6 +228,15 @@ async function run() {
   app.post('/bookedApartment', verifyToken, verifyAdmin, async(req,res) =>{
     const apartment = req.body
     const result = await bookedApartmentCollection.insertOne(apartment)
+    res.send(result)
+  })
+
+  app.get('/bookedApartment/:email', verifyToken, async(req, res)=>{
+    const query = { userEmail: req.params.email}
+    if(req.params.email !== req.decoded.email){
+      return res.status(403).send({message: 'forbidden'})
+    }
+    const result = await bookedApartmentCollection.find(query).toArray()
     res.send(result)
   })
   // ---------------------------------------
