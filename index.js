@@ -317,6 +317,34 @@ async function run() {
     // -----------------------------
     // Stats and Analytics
 
+    app.get('/admin-stats', async(req, res) =>{
+      const role = 'member'
+      const query = { role: role }
+      const totalMembers = await userCollection.countDocuments(query);
+      
+      const users = await userCollection.estimatedDocumentCount()
+      const apartments = await apartmentCollection.estimatedDocumentCount()
+      const bookedApartments = await bookedApartmentCollection.estimatedDocumentCount()
+      const availablePer = ((apartments - bookedApartments)/apartments)*100
+      const bookedPer = (bookedApartments/apartments)*100
+      const apartmentPer = (apartments/apartments)*100
+      const payments = await paymentCollection.estimatedDocumentCount()
+      const result = await paymentCollection.aggregate([
+        {
+          $group:{
+            _id: null,
+            totalRevenue:{
+              $sum: '$rent'
+            }
+          }
+        }
+      ]).toArray()
+      const revenue = result.length > 0 ? result[0].totalRevenue :0 ;
+      res.send({
+        users, apartmentPer, apartments, totalMembers, availablePer, bookedPer, bookedApartments, payments, revenue
+      })
+    })
+
     // using aggregate pipeline
 
     // -----------------------------
