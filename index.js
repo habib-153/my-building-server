@@ -317,7 +317,7 @@ async function run() {
     // -----------------------------
     // Stats and Analytics
 
-    app.get('/admin-stats', async(req, res) =>{
+    app.get('/admin-stats', verifyToken, verifyAdmin, async(req, res) =>{
       const role = 'member'
       const query = { role: role }
       const totalMembers = await userCollection.countDocuments(query);
