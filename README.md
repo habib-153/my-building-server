@@ -3,8 +3,8 @@
 > Technologies Used:
 >
 >><ul>
-  <li>First item</li>
-  <li>Second item</li>
-  <li>Third item</li>
-  <li>Fourth item</li>
+  <li>Express</li>
+  <li>MongoDb</li>
+  <li>vercel</li>
+  <li>jwt</li>
 </ul>
