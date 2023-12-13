@@ -4,12 +4,20 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
+const formData = require("form-data");
+const Mailgun = require("mailgun.js");
+const mailgun = new Mailgun(formData);
+
+const mg = mailgun.client({
+  username: "api",
+  key: process.env.MAIL_GUN_API_KEY,
+});
+
 const port = process.env.PORT || 5000;
 
 app.use(cors());
 app.use(express.json());
-
-//bistroBoss
 
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.29d8nwh.mongodb.net/?retryWrites=true&w=majority`;
@@ -265,6 +273,42 @@ async function run() {
       },
     };
     const result = await agreementRequestCollection.updateOne(filter, updateDoc)
+
+    let emailContent = {
+      accepted: {
+        subject: "Congratulations!",
+        text: "Your agreement request has been accepted.",
+        html: "<div><h2>Congratulations!</h2><h4>Your agreement request has been accepted.</h4></div>"
+      },
+      rejected: {
+        subject: "Sorry",
+        text: "Your agreement request has been rejected.",
+        html: "<div><h2>Sorry</h2><h4>Your agreement request has been rejected.</h4></div>"
+      }
+    };
+    
+    // Check the action and assign the appropriate content
+    let action = updatedAgreement.action;
+    let content;
+    if (action === "Accepted") {
+      content = emailContent.accepted;
+    } else if (action === "Rejected") {
+      content = emailContent.rejected;
+    } else {
+      // Handle other cases
+    }
+    
+    // Send the email with the content
+    mg.messages
+  .create(process.env.MAIL_SENDING_DOMAIN, {
+    from: "Mailgun Sandbox <postmaster@sandbox59983a7e403f4affbcfb5457d3af61a4.mailgun.org>",
+    to: ["h.r.sihab155@gmail.com"],
+        subject: content.subject,
+        text: content.text,
+        html: content.html
+      })
+      .then((msg) => console.log(msg)) // logs response data
+      .catch((err) => console.log(err)); 
     res.send(result)
   })
 
