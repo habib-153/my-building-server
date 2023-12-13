@@ -184,6 +184,20 @@ async function run() {
       }
     );
 
+    app.patch("/users", async(req,res)=>{
+      const updatedUser = req.body;
+      const email = updatedUser.email
+      const filter = { email: email}
+      const updatedDoc = {
+        $set: {
+          email: updatedUser.email,
+          name: updatedUser.name
+        }
+      };
+      const result = await userCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
     app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
