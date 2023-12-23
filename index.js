@@ -403,8 +403,6 @@ async function run() {
       })
     })
 
-    // using aggregate pipeline
-
     // -----------------------------
     // Send a ping to confirm a successful connection
     // await client.db("admin").command({ ping: 1 });
