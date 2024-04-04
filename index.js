@@ -56,7 +56,7 @@ async function run() {
 
     // middlewares
     const verifyToken = (req, res, next) => {
-      console.log(req.headers);
+      // console.log(req.headers);
       if (!req.headers.authorization) {
         return res.status(401).send({ message: "forbidden" });
       }
@@ -321,7 +321,8 @@ async function run() {
         text: content.text,
         html: content.html
       })
-      .then((msg) => console.log(msg)) // logs response data
+      .then((msg) => console.log(msg)
+      ) // logs response data
       .catch((err) => console.log(err)); 
     res.send(result)
   })
@@ -359,7 +360,7 @@ async function run() {
     app.post('/payments', async(req, res)=>{
       const payment = req.body;
       const paymentResult = await paymentCollection.insertOne(payment)
-      console.log('payment info', payment)
+      //console.log('payment info', payment)
       res.status(200).send(paymentResult)
     })
 
